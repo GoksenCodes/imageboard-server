@@ -14,14 +14,14 @@ const router = new Router();
 //   }
 // });
 
-//NOW WE WILL PAGINATION;
+//NOW WE WILL DO THE PAGINATION;
 
 router.get("/", async (req, res, next) => {
   try {
-    const limit = req.query.limit || 25;
+    const limit = req.query.limit || 25; // protect your API by imposing a maximum:
     const offset = req.query.offset || 0;
     console.log({ limit, offset });
-    const images = await Image.findAndCountAll({ limit, offset });
+    const images = await Image.findAndCountAll({ limit, offset }); // with this we send the number of images we have in api to the client.
     // respond with the images data
     res.json(images);
   } catch (error) {
