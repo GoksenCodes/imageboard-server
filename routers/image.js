@@ -1,5 +1,6 @@
 const { Router } = require("express");
 const Image = require("../models").image;
+const authMiddleware = require("../auth/middleware");
 
 const router = new Router();
 
@@ -16,7 +17,7 @@ const router = new Router();
 
 //NOW WE WILL DO THE PAGINATION;
 
-router.get("/", async (req, res, next) => {
+router.get("/", authMiddleware, async (req, res, next) => {
   try {
     const limit = req.query.limit || 25; // protect your API by imposing a maximum:
     const offset = req.query.offset || 0;
@@ -44,14 +45,30 @@ router.post("/", async (req, res, next) => {
 });
 
 router.get("/:id", async (req, res, next) => {
-  const id = req.params.imageId; //istenilen id'yi userin verdigi paramstan aliyoruz, yani user 3 etikladiysa route params da 3 cikiyor onu alip istenilen user bilfilerini vriyoruz
+  const imageId = req.params.id; //istenilen id'yi userin verdigi paramstan aliyoruz, yani user 3 etikladiysa route params da 3 cikiyor onu alip istenilen user bilfilerini vriyoruz
+  // console.log(req.params, id); once id yi alamadim. o yuzden req params a ve id ye baktik.
   try {
-    const image = await Image.findByPk(id);
+    const image = await Image.findByPk(imageId);
 
     if (!image) {
       res.status(404).send("No image found");
     } else {
       res.json(image);
+    }
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.put("/:id", async (req, res, next) => {
+  try {
+    const imageId = parseInt(req.params.id);
+    const imageToUpdate = await Image.findByPk(imageId);
+    if (!imageToUpdate) {
+      res.status(404).send("image not found");
+    } else {
+      const updatedImage = await imageToUpdate.update(req.body);
+      res.json(updatedImage);
     }
   } catch (e) {
     next(e);
